@@ -3587,7 +3587,8 @@ void MenuFunctions::changeMenu(Menu* menu, bool simple_change) {
     display_obj.init();
 
     #ifdef HAS_ILI9341
-      backlightOn();
+      extern void backlightOn();
+	  backlightOn();
     #endif
   }
   current_menu = menu;
