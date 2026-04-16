@@ -67,7 +67,7 @@ const char PROGMEM PACKET_COUNT_CMD[] = "packetcount";
 const char PROGMEM SIGSTREN_CMD[] = "sigmon";
 const char PROGMEM SCAN_ALL_CMD[] = "scanall";
 const char PROGMEM SCANAP_CMD[] = "scanap";
-const char PROGMEM SCANSTA_CMD[] = "scansta";
+//const char PROGMEM SCANSTA_CMD[] = "scansta";
 const char PROGMEM SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -115,9 +115,11 @@ const char PROGMEM ADD_CMD[] = "add";
 const char PROGMEM BT_SPAM_CMD[] = "blespam";
 const char PROGMEM BT_SNIFF_CMD[] = "sniffbt";
 const char PROGMEM BT_SPOOFAT_CMD[] = "spoofat";
-const char PROGMEM BT_WARDRIVE_CMD[] = "btwardrive";
+//const char PROGMEM BT_WARDRIVE_CMD[] = "btwardrive";
 const char PROGMEM BT_SKIM_CMD[] = "sniffskim";
 
+// POI
+const char PROGMEM WARDRIVEPOI_CMD[] = "wardrivepoi";
 
 //// Command help messages
 // Admin
@@ -142,7 +144,7 @@ const char PROGMEM HELP_PACKET_COUNT_CMD[] = "packetcount";
 const char PROGMEM HELP_SIGSTREN_CMD[] = "sigmon";
 const char PROGMEM HELP_SCAN_ALL_CMD[] = "scanall";
 const char PROGMEM HELP_SCANAP_CMD[] = "scanap";
-const char PROGMEM HELP_SCANSTA_CMD[] = "scansta";
+//const char PROGMEM HELP_SCANSTA_CMD[] = "scansta";
 const char PROGMEM HELP_SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -152,7 +154,7 @@ const char PROGMEM HELP_SNIFF_MULTISSID_CMD[] = "sniffmultissid";
 const char PROGMEM HELP_SNIFF_DEAUTH_CMD[] = "sniffdeauth";
 const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid [-c <channel>][-d][-l]";
 const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan [-f]";
-const char PROGMEM HELP_WARDRIVE_CMD[] = "wardrive [-s/-f]";
+const char PROGMEM HELP_WARDRIVE_CMD[] = "wardrive [-f]";
 const char PROGMEM HELP_PING_CMD[] = "pingscan";
 const char PROGMEM HELP_PORT_SCAN_CMD[] = "portscan [-a -t <ip index>]/[-s <ssh/telnet/dns/http/smtp/https/rdp>]";
 const char PROGMEM HELP_ARP_SCAN_CMD[] = "arpscan [-f]";
@@ -191,12 +193,13 @@ const char PROGMEM HELP_BT_SPOOFAT_CMD[] = "spoofat -t <index>";
 //const char PROGMEM HELP_BT_SWIFTPAIR_SPAM_CMD[] = "swiftpair";
 //const char PROGMEM HELP_BT_SAMSUNG_SPAM_CMD[] = "samsungblespam";
 //onst char PROGMEM HELP_BT_SPAM_ALL_CMD[] = "btspamall";
-const char PROGMEM HELP_BT_WARDRIVE_CMD[] = "btwardrive";
+//const char PROGMEM HELP_BT_WARDRIVE_CMD[] = "btwardrive";
 const char PROGMEM HELP_BT_SKIM_CMD[] = "sniffskim";
 
 const char PROGMEM BRIGHTNESS_CMD[] = "brightness";
 const char PROGMEM HELP_BRIGHTNESS_CMD[] = "brightness [-c cycle] [-s <0-9>]";
 
+const char PROGMEM HELP_WARDRIVEPOI_CMD[] = "wardrivepoi [label] - Tag a GPS POI during wardrive";
 const char PROGMEM HELP_FOOT[] = "==================================";
 
 

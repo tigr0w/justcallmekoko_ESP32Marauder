@@ -163,9 +163,9 @@ class MenuFunctions
     Menu wifiSnifferMenu;
     Menu wifiScannerMenu;
     Menu wifiAttackMenu;
-    #ifdef HAS_GPS
+    /*#ifdef HAS_GPS
       Menu wardrivingMenu;
-    #endif
+    #endif*/
     Menu wifiGeneralMenu;
     Menu wifiAPMenu;
     Menu wifiIPMenu;
@@ -222,7 +222,6 @@ class MenuFunctions
     void battery(bool initial = false);
     void battery2(bool initial = false);
     String callSetting(String key);
-    void runBoolSetting(String ley);
     void displaySetting(String key, Menu* menu, int index);
     void buttonSelected(int b, int x = -1);
     void buttonNotSelected(int b, int x = -1);

@@ -217,6 +217,32 @@ void MenuFunctions::main(uint32_t currentTime)
     }
   #endif
 
+  // POI button interception during wardrive — full width bottom bar
+  #ifdef HAS_ILI9341
+    if (pressed &&
+        (wifi_scan_obj.currentScanMode == WIFI_SCAN_WAR_DRIVE ||
+         wifi_scan_obj.currentScanMode == WIFI_SCAN_STATION_WAR_DRIVE)) {
+      if (t_y >= 270) {
+        wifi_scan_obj.tagPOI(nullptr);
+        // Brief green flash
+        display_obj.tft.fillRect(0, 270, 240, 50, TFT_GREEN);
+        display_obj.tft.setTextSize(2);
+        if (gps_obj.getFixStatus())
+          display_obj.tft.setTextColor(TFT_BLACK, TFT_GREEN);
+        else
+          display_obj.tft.setTextColor(TFT_BLACK, TFT_RED);
+        String poiFlash = "POI (" + String(wifi_scan_obj.poiCount) + ")";
+        int16_t flashWidth = poiFlash.length() * 12;
+        display_obj.tft.setCursor((240 - flashWidth) / 2, 287);
+        display_obj.tft.print(poiFlash);
+        delay(200);
+        x = -1;
+        y = -1;
+        return;
+      }
+    }
+  #endif
+
   // This is if there are scans/attacks going on
   #ifdef HAS_ILI9341
     if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
@@ -282,6 +308,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == BT_SCAN_SIMPLE) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SIMPLE_TWO) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SOUR_APPLE) ||
+          (wifi_scan_obj.currentScanMode == BT_ATTACK_APPLE_JUICE) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
@@ -387,6 +414,7 @@ void MenuFunctions::main(uint32_t currentTime)
             (wifi_scan_obj.currentScanMode == BT_SCAN_SIMPLE) ||
             (wifi_scan_obj.currentScanMode == BT_SCAN_SIMPLE_TWO) ||
             (wifi_scan_obj.currentScanMode == BT_ATTACK_SOUR_APPLE) ||
+            (wifi_scan_obj.currentScanMode == BT_ATTACK_APPLE_JUICE) ||
             (wifi_scan_obj.currentScanMode == BT_ATTACK_SWIFTPAIR_SPAM) ||
             (wifi_scan_obj.currentScanMode == BT_ATTACK_SPAM_ALL) ||
             (wifi_scan_obj.currentScanMode == BT_ATTACK_SAMSUNG_SPAM) ||
@@ -613,43 +641,6 @@ void MenuFunctions::main(uint32_t currentTime)
             this->displayMenuButtons();
         }
       }
-  
-      // Check if any key has changed state
-      /*for (uint8_t b = 0; b < current_menu->list->size(); b++) {
-        display_obj.tft.setFreeFont(MENU_FONT);
-        if (display_obj.key[b].justPressed()) {
-          display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
-          if (current_menu->list->get(b).name != text09)
-            display_obj.tft.drawXBitmap(0,
-                                        KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
-                                        menu_icons[current_menu->list->get(b).icon],
-                                        ICON_W,
-                                        ICON_H,
-                                        this->getColor(current_menu->list->get(b).color),
-                                        TFT_BLACK);
-        }
-  
-        // If button was just release, execute the button's function
-        if ((display_obj.key[b].justReleased()) && (!pressed))
-        {
-          display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
-          current_menu->list->get(b).callable();
-        }
-        // This
-        else if ((display_obj.key[b].justReleased()) && (pressed)) {
-          display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
-          if (current_menu->list->get(b).name != text09)
-            display_obj.tft.drawXBitmap(0,
-                                        KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),
-                                        menu_icons[current_menu->list->get(b).icon],
-                                        ICON_W,
-                                        ICON_H,
-                                        TFT_BLACK,
-                                        this->getColor(current_menu->list->get(b).color));
-        }
-  
-        display_obj.tft.setFreeFont(NULL);
-      }*/
     }
     x = -1;
     y = -1;
@@ -1372,8 +1363,7 @@ void MenuFunctions::drawStatusBar()
   }
 }
 
-void MenuFunctions::orientDisplay()
-{
+void MenuFunctions::orientDisplay() {
   display_obj.init();
 
   display_obj.tft.setRotation(SCREEN_ORIENTATION); // Portrait
@@ -1388,11 +1378,7 @@ void MenuFunctions::orientDisplay()
     #endif
   #endif
 
-  changeMenu(current_menu);
-}
-
-void MenuFunctions::runBoolSetting(String key) {
-  display_obj.tftDrawRedOnOffButton();
+  changeMenu(current_menu, true);
 }
 
 String MenuFunctions::callSetting(String key) {
@@ -1407,9 +1393,6 @@ String MenuFunctions::callSetting(String key) {
 
 void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
   specSettingMenu.name = key;
-
-  Serial.print(F("displaySetting: "));
-  Serial.println(key);
 
   bool setting_value = settings_obj.loadSetting<bool>(key);
 
@@ -1497,9 +1480,9 @@ void MenuFunctions::RunSetup()
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
   wifiScannerMenu.list = new LinkedList<MenuNode>();
   wifiAttackMenu.list = new LinkedList<MenuNode>();
-  #ifdef HAS_GPS
+  /*#ifdef HAS_GPS
     wardrivingMenu.list = new LinkedList<MenuNode>();
-  #endif
+  #endif*/
   wifiGeneralMenu.list = new LinkedList<MenuNode>();
   wifiAPMenu.list = new LinkedList<MenuNode>();
   wifiIPMenu.list = new LinkedList<MenuNode>();
@@ -1574,7 +1557,7 @@ void MenuFunctions::RunSetup()
   #ifdef HAS_GPS
     gpsMenu.name = "GPS"; 
     gpsInfoMenu.name = "GPS Data";
-    wardrivingMenu.name = "Wardriving";
+    //wardrivingMenu.name = "Wardriving";
   #endif  
   htmlMenu.name = "EP HTML List";
   miniKbMenu.name = "Mini Keyboard";
@@ -1620,11 +1603,11 @@ void MenuFunctions::RunSetup()
   this->addNodes(&wifiMenu, "Scanners", TFTORANGE, NULL, SCANNERS, [this]() {
     this->changeMenu(&wifiScannerMenu, true);
   });
-  #ifdef HAS_GPS
+  /*#ifdef HAS_GPS
     this->addNodes(&wifiMenu, "Wardriving", TFTGREEN, NULL, BEACON_SNIFF, [this]() {
       this->changeMenu(&wardrivingMenu, true);
     });
-  #endif
+  #endif*/
   this->addNodes(&wifiMenu, text_table1[32], TFTRED, NULL, ATTACKS, [this]() {
     this->changeMenu(&wifiAttackMenu, true);
   });
@@ -1798,11 +1781,11 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_AP_STA, 0x97e0);
   });
-  this->addNodes(&wifiSnifferMenu, text_table1[59], TFTORANGE, NULL, PACKET_MONITOR, [this]() {
+  /*this->addNodes(&wifiSnifferMenu, text_table1[59], TFTORANGE, NULL, PACKET_MONITOR, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_STATION, TFT_WHITE);
-  });
+  });*/
   this->addNodes(&wifiSnifferMenu, "Signal Monitor", TFTCYAN, NULL, PACKET_MONITOR, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
@@ -1821,19 +1804,19 @@ void MenuFunctions::RunSetup()
 
   // Build Wardriving menu
   #ifdef HAS_GPS
-    wardrivingMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
+    /*wardrivingMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
     this->addNodes(&wardrivingMenu, text09, TFTLIGHTGREY, NULL, 0, [this]() {
       this->changeMenu(wardrivingMenu.parentMenu, true);
-    });
+    });*/
     if (gps_obj.getGpsModuleStatus()) {
-      this->addNodes(&wardrivingMenu, "Wardrive", TFTGREEN, NULL, BEACON_SNIFF, [this]() {
+      this->addNodes(&wifiSnifferMenu, "Wardrive", TFTGREEN, NULL, BEACON_SNIFF, [this]() {
         display_obj.clearScreen();
         this->drawStatusBar();
         wifi_scan_obj.StartScan(WIFI_SCAN_WAR_DRIVE, TFT_GREEN);
       });
     }
   #endif
-  #ifdef HAS_GPS
+  /*#ifdef HAS_GPS
     if (gps_obj.getGpsModuleStatus()) {
       this->addNodes(&wardrivingMenu, "Station Wardrive", TFTORANGE, NULL, PROBE_SNIFF, [this]() {
         display_obj.clearScreen();
@@ -1841,7 +1824,7 @@ void MenuFunctions::RunSetup()
         wifi_scan_obj.StartScan(WIFI_SCAN_STATION_WAR_DRIVE, TFT_ORANGE);
       });
     }
-  #endif
+  #endif*/
 
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -2575,15 +2558,6 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_SCAN_AIRTAG_MON, TFT_WHITE);
   });
-  #ifdef HAS_GPS
-    if (gps_obj.getGpsModuleStatus()) {
-      this->addNodes(&bluetoothSnifferMenu, "BT Wardrive", TFTCYAN, NULL, BLUETOOTH_SNIFF, [this]() {
-        display_obj.clearScreen();
-        this->drawStatusBar();
-        wifi_scan_obj.StartScan(BT_SCAN_WAR_DRIVE, TFT_GREEN);
-      });
-    }
-  #endif
   this->addNodes(&bluetoothSnifferMenu, text_table1[35], TFTMAGENTA, NULL, CC_SKIMMERS, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
@@ -2620,6 +2594,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_ATTACK_SOUR_APPLE, TFT_GREEN);
+  });
+  this->addNodes(&bluetoothAttackMenu, "Apple Juice", TFTYELLOW, NULL, DEAUTH_SNIFF, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(BT_ATTACK_APPLE_JUICE, TFT_YELLOW);
   });
   this->addNodes(&bluetoothAttackMenu, "Swiftpair Spam", TFTCYAN, NULL, KEYBOARD_ICO, [this]() {
     display_obj.clearScreen();
