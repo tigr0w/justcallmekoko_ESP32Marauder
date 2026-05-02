@@ -2896,6 +2896,7 @@ void MenuFunctions::RunSetup()
     changeMenu(settingsMenu.parentMenu, true);
   });
   for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
+    settings_obj.setting_index_to_name(i);
     if (this->callSetting(settings_obj.setting_index_to_name(i)) == "bool")
       this->addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFTLIGHTGREY, NULL, SETTINGS, [this, i]() {
         settings_obj.toggleSetting(settings_obj.setting_index_to_name(i));
@@ -2909,6 +2910,8 @@ void MenuFunctions::RunSetup()
         wifi_scan_obj.channel_hop = settings_obj.loadSetting<bool>("ChanHop");
     }, settings_obj.loadSetting<bool>(settings_obj.setting_index_to_name(i)));
   }
+
+  Serial.println("Finished settings nodes");
 
   // Specific setting menu
   specSettingMenu.parentMenu = &settingsMenu;
@@ -2932,6 +2935,8 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     this->changeMenu(infoMenu.parentMenu, true);
   });
+
+  Serial.println("Changing to main menu...");
 
   // Set the current menu to the mainMenu
   this->changeMenu(&mainMenu, true);
@@ -2984,7 +2989,7 @@ void MenuFunctions::RunSetup()
                 else
                   this->mini_kb_index = str_len - 2;
 
-                targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                 this->buildButtons(targetMenu);
 
                 while (!l_btn.justReleased()) {
@@ -3006,7 +3011,7 @@ void MenuFunctions::RunSetup()
                 else
                   this->mini_kb_index = 0;
 
-                targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                 this->buildButtons(targetMenu, 0, String(char_array[this->mini_kb_index]).c_str());
                 
                 while (!r_btn.justReleased()) {
@@ -3062,7 +3067,7 @@ void MenuFunctions::RunSetup()
                   else
                     this->mini_kb_index = 0;
 
-                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                   this->buildButtons(targetMenu, 0, String(char_array[this->mini_kb_index]).c_str());
                 }
               }
@@ -3089,7 +3094,7 @@ void MenuFunctions::RunSetup()
                   else
                     this->mini_kb_index = str_len - 2;
 
-                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                   this->buildButtons(targetMenu);
                 }
               }
@@ -3182,7 +3187,7 @@ void MenuFunctions::RunSetup()
               else
                 this->mini_kb_index = str_len - 2;
 
-              targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+              targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
               this->buildButtons(targetMenu);
               while (display_obj.updateTouch(&t_x, &t_y) > 0)
                 delay(1);
@@ -3197,7 +3202,7 @@ void MenuFunctions::RunSetup()
               else
                 this->mini_kb_index = 0;
 
-              targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+              targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
               this->buildButtons(targetMenu, 0, String(char_array[this->mini_kb_index]).c_str());
               while (display_obj.updateTouch(&t_x, &t_y) > 0)
                 delay(1);
@@ -3244,7 +3249,7 @@ void MenuFunctions::RunSetup()
                   else
                     this->mini_kb_index = 0;
 
-                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                   this->buildButtons(targetMenu, 0, String(char_array[this->mini_kb_index]).c_str());
                 }
               }
@@ -3271,7 +3276,7 @@ void MenuFunctions::RunSetup()
                   else
                     this->mini_kb_index = str_len - 2;
 
-                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, NULL, true, NULL});
+                  targetMenu->list->set(0, MenuNode{String(char_array[this->mini_kb_index]).c_str(), false, TFTCYAN, 0, true, NULL});
                   this->buildButtons(targetMenu);
                 }
               }
@@ -3404,10 +3409,10 @@ void MenuFunctions::buildSDFileMenu(bool update) {
 
 
 // Function to add MenuNodes to a menu
-void MenuFunctions::addNodes(Menu * menu, String name, uint8_t color, Menu * child, int place, std::function<void()> callable, bool selected, String command)
+void MenuFunctions::addNodes(Menu * menu, String name, uint8_t color, Menu * child, int place, std::function<void()> callable, bool selected)
 {
-  TFT_eSPI_Button new_button;
-  menu->list->add(MenuNode{name, false, color, place, &new_button, selected, callable});
+  //Serial.println("Building node: " + name);
+  menu->list->add(MenuNode{name, false, color, place, selected, callable});
 }
 
 void MenuFunctions::setGraphScale(float scale) {
