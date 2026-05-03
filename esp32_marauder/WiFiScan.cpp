@@ -3914,6 +3914,9 @@ void WiFiScan::RunInfo() {
     }
   #endif
   
+  if (this->wifi_connected)
+      showNetworkInfo();
+
   //#ifdef HAS_SCREEN
   //  display_obj.tft.println(text_table4[35] + (String)temp_obj.current_temp + " C");
   //#endif
